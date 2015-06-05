@@ -1,17 +1,60 @@
 #!/usr/bin/env python
 from __future__ import print_function
 import argparse
+import datetime
 import imp
+import json
 import logging
 import sys
 import time
-from stat_daemon import plugins
-from stat_daemon.util import require_args
-from stat_daemon.task import TaskRunner
+
+import stat_daemon.plugins.stats
+import stat_daemon.tsa
 
 from airflow.executors import SequentialExecutor, LocalExecutor, CeleryExecutor
-from stat_daemon.util import MetadataTable
-from stat_daemon.task import TaskList
+from stat_daemon.util import require_args, load_plugin
+from stat_daemon.models import MetadataTable, MetadataTags, MetadataAlerts
+from stat_daemon.tasks import TaskList, TaskRunner
+
+from stat_daemon.captain_hindsight.www.app import CaptainHindsight
+
+def status(args):
+    """
+    Report on the status of a specified data set
+    """
+    pass
+
+def alert(args):
+    """
+    Send an alert for a dataset
+    """
+    pass
+
+def webserver(args):
+    """
+    Start the webserver
+    """
+    app = CaptainHindsight(table=args.dest,
+            sql_conn_id=args.sql_conn_id).get_app()
+    logging.getLogger().setLevel(logging.INFO)
+    app.run(debug=args.debug, host='0.0.0.0', port=args.port)
+
+
+def detrend_timeseries(args):
+    """
+    Remove trends
+    """
+    require_args(args, {'type', 'path'})
+    path = args.type + ':' + args.path
+    data, fit, error, tags = stat_daemon.tsa.detrend(
+                path, args.stat, 
+                table=args.dest, 
+                sql_conn_id=args.sql_conn_id,
+                start_time=args.start_time,
+                end_time=args.end_time,
+                plugin=args.plugin)
+    print(json.dumps([(x.isoformat(), y) for x, y in fit]))
+
 
 def create_table(args):
     """
@@ -39,7 +82,7 @@ def show_stats(args):
     """
     table = MetadataTable(table_name=args.dest,
                           sql_conn_id=args.sql_conn_id)
-    rows = table.get_records(filters=args.filters,
+    rows = table.get_records(where=args.filters,
                              limit=args.limit)
     print(rows)
 
@@ -62,19 +105,14 @@ def update(args):
     require_args(args, {'type', 'path'})
     plugin = None
     if args.plugin:
-        try:
-            plugin = imp.load_source('plugin', args.plugin)
-        except Exception as e:
-            logging.error("Could not load plugin {}.".format(args.plugin))
-            logging.error(e)
-            return
+        plugin = load_plugin(args.plugin)
     else:
         try:
-            lib = 'stat_daemon.plugins.{}_default'.format(args.type)
-            logging.info("Plugin not specified; using {}".format(lib))
-            plugin = getattr(plugins, '{}_default'.format(args.type))
+            logging.info("Plugin not specified; using default.")
+            plugin = getattr(
+                stat_daemon.plugins.stats, '{}_default'.format(args.type))
         except Exception as e:
-            logging.error("Could not load plugin {}.".format(lib))
+            logging.error("Could not load plugin {}_default".format(args.type))
             logging.error(e)
             return
     try:
@@ -195,6 +233,9 @@ def add_args(parser, args=None):
     if 'path' in args:
         parser.add_argument("--path",
                             help="Data path")
+    if 'stat' in args:
+        parser.add_argument("--stat",
+                            help="Stat to consider")
     if 'plugin' in args:
         parser.add_argument("--plugin",
                             help="Plugin script to be executed")
@@ -225,6 +266,20 @@ def get_parser():
                              {'type', 'path', 'dest', 'filters',
                              'sql_conn_id'})
     parser_delete.set_defaults(func=clear_stats)
+    ht = "Detrend the data set"
+    parser_detrend_timeseries = subparsers.add_parser('detrend_timeseries',
+     help=ht)
+    parser_detrend_timeseries.add_argument("--start_time",
+                                default='2011-01-01',
+                               help="earliest time to consider")
+    parser_detrend_timeseries.add_argument("--end_time",
+                                default=datetime.datetime.utcnow(
+                                    ).strftime('%Y-%m-%d'),
+                               help="The latest time to consider")
+    parser_detrend_timeseries = add_args(parser_detrend_timeseries,
+                           {'plugin', 'type', 'path', 'stat', 'dest',
+                           'sql_conn_id'})
+    parser_detrend_timeseries.set_defaults(func=detrend_timeseries)
     ht = "List the tasks that will be performed"
     parser_ls_tasks = subparsers.add_parser('ls_tasks', help=ht)
     parser_ls_tasks = add_args(parser_ls_tasks,
@@ -260,6 +315,17 @@ def get_parser():
     parser_version = subparsers.add_parser('version',
                                            help="Show version")
     parser_version.set_defaults(func=version)
+    ht = "Start the webserver"
+    parser_webserver = subparsers.add_parser('webserver', help=ht)
+    parser_webserver.add_argument("--port",
+                                    type=int,
+                                    default=6969,
+                                    help="The port to run on")
+    parser_webserver.add_argument("--debug",
+                                    action='store_true',
+                                    help="Run in debug mode")
+    parser_webserver = add_args(parser_webserver, {'dest', 'sql_conn_id'})
+    parser_webserver.set_defaults(func=webserver)
     return parser
 
 if __name__ == '__main__':

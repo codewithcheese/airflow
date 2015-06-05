@@ -1,0 +1,2 @@
+recursive-include stat_daemon/captain_hindsight/www/templates *
+recursive-include stat_daemon/captain_hindsight/www/static *

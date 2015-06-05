@@ -10,6 +10,8 @@ setup(
     author_email="aaron.keys@airbnb.com",
     # Packages
     packages=find_packages(),
+    include_package_data=True,
+    zip_safe=False,
     # Include additional files into the package
     #include_package_data=True,
     scripts=['stat_daemon/stat_daemon', ],
