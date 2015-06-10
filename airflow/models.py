@@ -319,6 +319,8 @@ class Connection(Base):
                 return hooks.HiveServer2Hook(hiveserver2_conn_id=self.conn_id)
             elif self.conn_type == 'sqlite':
                 return hooks.SqliteHook(sqlite_conn_id=self.conn_id)
+            elif self.conn_type == 'rabbitmq':
+                return hooks.RabbitMQHook(rabbitmq_conn_id=self.conn_id)
         except:
             return None
 
