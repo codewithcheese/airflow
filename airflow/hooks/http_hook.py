@@ -1,6 +1,7 @@
 from airflow.hooks.base_hook import BaseHook
 import urllib2
 import logging
+import requests
 
 class HTTPHook(BaseHook):
     """
@@ -26,6 +27,7 @@ class HTTPHook(BaseHook):
             url = conn.schema + '://' + conn.login + ':' + conn.password + '@' + conn.host + ':' + str(port) + path
         else:
             url = conn.schema + '://' + conn.host + ':' + str(port) + path
+
         logging.info('HTTP GET: ' + url)
-        response = urllib2.urlopen(url)
-        return response.read()
+        response = requests.get(url)
+        return response.content
