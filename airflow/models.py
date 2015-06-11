@@ -321,6 +321,8 @@ class Connection(Base):
                 return hooks.SqliteHook(sqlite_conn_id=self.conn_id)
             elif self.conn_type == 'rabbitmq':
                 return hooks.RabbitMQHook(rabbitmq_conn_id=self.conn_id)
+            elif self.conn_type == 'http':
+                return hooks.HTTPHook(http_conn_id=self.conn_id)
         except:
             return None
 

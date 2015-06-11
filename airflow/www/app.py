@@ -1518,7 +1518,8 @@ class ConnectionModelView(SuperUserMixin, ModelView):
             ('s3', 'S3',),
             ('samba', 'Samba',),
             ('sqlite', 'Sqlite',),
-            ('rabbitmq', 'RabbitMQ')
+            ('rabbitmq', 'RabbitMQ'),
+            ('http', 'HTTP'),
         ]
     }
 mv = ConnectionModelView(
