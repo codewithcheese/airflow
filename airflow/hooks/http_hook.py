@@ -23,7 +23,7 @@ class HTTPHook(BaseHook):
         if conn.port:
             port = conn.port
         if conn.login:
-            url = conn.schema + '://' + conn.login + ':' + conn.password + '@' + conn.host + ':' + str(port) + '/' + path
+            url = conn.schema + '://' + conn.login + ':' + conn.password + '@' + conn.host + ':' + str(port) + path
         else:
             url = conn.schema + '://' + conn.host + ':' + str(port) + path
         logging.info('HTTP GET: ' + url)
