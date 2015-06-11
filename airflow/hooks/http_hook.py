@@ -23,11 +23,12 @@ class HTTPHook(BaseHook):
         port = 80
         if conn.port:
             port = conn.port
+        url = conn.schema + '://' + conn.host + ':' + str(port) + path
         if conn.login:
-            url = conn.schema + '://' + conn.login + ':' + conn.password + '@' + conn.host + ':' + str(port) + path
+            auth = (conn.login, conn.password)
         else:
-            url = conn.schema + '://' + conn.host + ':' + str(port) + path
+            auth = None
 
         logging.info('HTTP GET: ' + url)
-        response = requests.get(url, verify=False)
+        response = requests.get(url, verify=False, auth=auth)
         return response.content
