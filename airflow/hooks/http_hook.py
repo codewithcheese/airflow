@@ -19,13 +19,13 @@ class HTTPHook(BaseHook):
 
     def GET(self, path):
         conn = self.get_conn()
-        port = '80'
+        port = 80
         if conn.port:
             port = conn.port
         if conn.login:
-            url = conn.schema + '://' + conn.login + ':' + conn.password + '@' + conn.host + ':' + port + '/' + path
+            url = conn.schema + '://' + conn.login + ':' + conn.password + '@' + conn.host + ':' + str(port) + '/' + path
         else:
-            url = conn.schema + '://' + conn.host + ':' + port + path
+            url = conn.schema + '://' + conn.host + ':' + str(port) + path
         logging.info('HTTP GET: ' + url)
         response = urllib2.urlopen(url)
         return response.read()
