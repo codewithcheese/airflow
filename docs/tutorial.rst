@@ -379,6 +379,8 @@ init scripts or supervisor to make sure the scheduler is running when your syste
 If you are using CeleryExecutor you will also need to ensure at least one instance of
 ``airflow worker`` is running to process the tasks in your queues.
 
+For more information please refer to the :doc:`scheduler` section.
+
 
 What's Next?
 -------------
