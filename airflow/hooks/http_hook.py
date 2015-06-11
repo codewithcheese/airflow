@@ -29,5 +29,5 @@ class HTTPHook(BaseHook):
             url = conn.schema + '://' + conn.host + ':' + str(port) + path
 
         logging.info('HTTP GET: ' + url)
-        response = requests.get(url)
+        response = requests.get(url, verify=False)
         return response.content
