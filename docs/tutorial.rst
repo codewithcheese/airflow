@@ -370,9 +370,9 @@ start_date specified itself, for which this dependency is disregarded.
     # start your backfill on a date range
     airflow backfill tutorial -s 2015-01-01 -e 2015-01-07
 
-Schedule
+Scheduler
 ''''''''
-``airflow schedule`` needs to be running for the tasks in your DAGs to be
+``airflow scheduler`` needs to be running for the tasks in your DAGs to be
 triggered at the appropriate future intervals by the scheduler. Use a daemon such as
 init scripts or supervisor to make sure the scheduler is running when your system starts.
 
