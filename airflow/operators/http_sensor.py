@@ -42,7 +42,7 @@ class HTTPSensor(BaseSensorOperator):
             raise Exception(response)
         except ValueError:
             pass
-        if response[-1] == '0':
+        if response.strip() == '0':
             return True
         else:
             return False
