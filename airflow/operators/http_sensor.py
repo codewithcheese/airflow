@@ -27,7 +27,7 @@ class HTTPSensor(BaseSensorOperator):
         session = settings.Session()
         db = session.query(DB).filter(DB.conn_id == conn_id).first()
         if not db:
-            raise Exception("conn_id doesn't exist in the repository")
+            raise Exception("conn_id " + str(conn_id) + " doesn't exist in the repository")
         logging.info('Found DB', extra=dict(conn_id=db.conn_id, conn_type=db.conn_type))
         self.hook = db.get_hook()
         session.commit()
