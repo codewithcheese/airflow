@@ -44,6 +44,7 @@ class HTTPSensor(BaseSensorOperator):
             pass
         lines = response.strip().split("\n")
         # evaluate response on last line
+        logging.info('Result:' + str(lines[len(lines) - 1].strip()))
         if lines[len(lines) - 1].strip() == '0':
             return True
         else:
