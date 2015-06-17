@@ -42,7 +42,9 @@ class HTTPSensor(BaseSensorOperator):
             raise Exception(response)
         except ValueError:
             pass
-        if response.strip() == '0':
+        lines = response.strip().split("\n")
+        # evaluate response on last line
+        if lines[len(lines) - 1].strip() == '0':
             return True
         else:
             return False
